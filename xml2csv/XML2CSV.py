@@ -9,7 +9,7 @@
 #    - Parameterise Input/output files
 #
 import xml.etree.ElementTree as ET
-import csv, sys
+import csv
 import logging
 
 # Reference Values
@@ -18,8 +18,9 @@ import logging
 logging.basicConfig( format='%(asctime)s %(message)s', level=logging.INFO ) 
 
 ## File names
-inputFileName = 'Input_Sample.xml'
-outputFilename = 'Output.xml'
+
+inputFileName = 'Test.xml' 
+outputFilename = 'Test.csv'
 
 ## XML tag names in the input file
 constFileTag = 'file'
@@ -36,6 +37,7 @@ def writeCSV( listOfDictDataItems ):
 	output_fieldnames = [
 		'filename',
 		'unit',
+		'unit_serial_num',
 		'kind',
 		'cyclomatic_complexity'
 	]
@@ -62,18 +64,31 @@ for file in root.iter(constFileTag):
 	fileName = file.attrib.get('name')
 	logging.debug( 'Processing details of file - %s', fileName)
 
+	# set/reset vars we use for each change in file
+	sr_num = 0 
+	listTempUnitsInThisFile = []
+
 	# for every <unit> under <file> - no matter how deep!
 	for unit in file.findall(".//unit"):
+
 		# extract unit details
 		unitName = unit.attrib["name"]
 		unitKind = unit.attrib["kind"]
+
+		# Look for units with complexity data
 		unitComplexity = unit.find("./metric[@name='cyclomatic_complexity']")
-		if unitComplexity != None:
-			#logging.debug( '%s,%s,%s,%s', fileName, unitName, unitKind, unitComplexity.text )
+		if unitComplexity != None:			
+
+			# keep a tab of unit names we are adding under this file
+			listTempUnitsInThisFile.append(unitName)
+			unitSrNum = listTempUnitsInThisFile.count(unitName) # how many have we got now?
+						
 			# add to list
+			logging.debug( '%s,%s,%s,%s,%s', fileName, unitName, unitSrNum, unitKind, unitComplexity.text )
 			listData.append({
 				"filename": fileName,
 				"unit": unitName,
+				"unit_serial_num": unitSrNum,
 				"kind": unitKind,
 				"cyclomatic_complexity": unitComplexity.text
 				})
