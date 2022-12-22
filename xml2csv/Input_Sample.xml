@@ -448,6 +448,64 @@
          </unit>
       </unit>
    </file>
+   <file name="/data/build/jenkins2/workspace/Some_job/trunk/Source/Subsystem_1/file_with_dupe_units.ads">
+      <!-- File unit with duplicate child units. Mocked to test scenario -->
+      <metric name="all_lines">106</metric>
+      <metric name="code_lines">42</metric>
+      <metric name="comment_lines">48</metric>
+      <metric name="eol_comments">8</metric>
+      <metric name="comment_percentage">62.22</metric>
+      <metric name="blank_lines">16</metric>
+      <metric name="average_lines_in_bodies">0.00</metric>
+      <metric name="cyclomatic_complexity">999.99</metric>
+      <unit name="Mum_Unit_1" kind="package" line="59" col="1">
+         <!-- intentionally without cyclomatic_complexity metric -->
+         <metric name="all_lines">46</metric>
+         <metric name="code_lines">33</metric>
+         <metric name="comment_lines">1</metric>
+         <metric name="eol_comments">8</metric>
+         <metric name="comment_percentage">26.47</metric>
+         <metric name="cyclomatic_complexity">888</metric>
+         <metric name="blank_lines">12</metric>
+         <metric name="public_types">1</metric>
+         <metric name="private_types">1</metric>
+         <metric name="all_types">2</metric>
+         <metric name="public_subprograms">7</metric>
+         <metric name="all_stmts">0</metric>
+         <metric name="all_dcls">30</metric>
+         <metric name="lsloc">30</metric>
+         <metric name="unit_nesting">1</metric>
+         <metric name="construct_nesting">1</metric>
+         <unit name="Baby_Unit" kind="procedure" line="63" col="4">
+            <metric name="all_parameters">2</metric>
+               <metric name="in_parameters">2</metric>
+               <metric name="out_parameters">0</metric>
+               <metric name="in_out_parameters">0</metric>
+               <metric name="cyclomatic_complexity">777</metric>
+         </unit>
+         <unit name="Baby_Unit_1" kind="procedure" line="67" col="4">
+            <metric name="all_parameters">4</metric>
+               <metric name="in_parameters">3</metric>
+               <metric name="out_parameters">0</metric>
+               <metric name="in_out_parameters">1</metric>
+               <metric name="cyclomatic_complexity">666</metric>
+         </unit>
+         <unit name="Baby_Unit" kind="procedure" line="70" col="4">
+            <metric name="all_parameters">4</metric>
+               <metric name="in_parameters">3</metric>
+               <metric name="out_parameters">0</metric>
+               <metric name="in_out_parameters">1</metric>
+               <metric name="cyclomatic_complexity">666</metric>
+         </unit>
+         <unit name="Baby_Unit" kind="procedure" line="99" col="4">
+            <metric name="all_parameters">4</metric>
+               <metric name="in_parameters">3</metric>
+               <metric name="out_parameters">0</metric>
+               <metric name="in_out_parameters">1</metric>
+               <metric name="cyclomatic_complexity">666</metric>
+         </unit>
+      </unit>
+   </file>   
 <metric name="all_lines">2136021</metric>
    <metric name="code_lines">1210835</metric>
    <metric name="comment_lines">538134</metric>
