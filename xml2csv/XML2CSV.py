@@ -1,36 +1,29 @@
-# Script to process the XML output of Adacore gnatmetric command
-# and write it to a CSV file. See Input_Sample.xml for the XML
-# structure it was developed against.
-#
-# Last known compatibility: Python 3.8
-#
-# TODO 
-#    - Error handling
-#    - Parameterise Input/output files
-#
+"""Script to extract cyclomatic complexity data from the XML output of Adacore gnatmetric command
+
+Usage:
+	python <scriptname.py>
+
+TODO 
+	- Error handling
+	- Accept input and output via command line params
+"""
 import xml.etree.ElementTree as ET
 import csv
 import logging
 
-# Reference Values
+def setLoggingConfig():
+	"""Set logging level and format
+	"""
+	logging.basicConfig( format='%(asctime)s %(message)s', level=logging.INFO ) 
 
-## Flags
-logging.basicConfig( format='%(asctime)s %(message)s', level=logging.INFO ) 
 
-## File names
+def writeCSV( listOfDictDataItems, outputFilename ):
+	"""Write Data to CSV file
 
-inputFileName = 'Test.xml' 
-outputFilename = 'Test.csv'
-
-## XML tag names in the input file
-constFileTag = 'file'
-constUnitTag = 'unit'
-
-# function to write CSV file
-#
-# Input Param: A list of dictionary items
-#
-def writeCSV( listOfDictDataItems ):
+		Args:
+			listOfDictDataItems (List): A list of dictionary items, each of which represents the field values
+			outputFilename (str): file name for writing CSV data to
+	"""
 
 	logging.info( 'Preparing to write %s lines to output CSV - %s', len( listOfDictDataItems ), outputFilename)
 
@@ -50,50 +43,77 @@ def writeCSV( listOfDictDataItems ):
 
 	logging.info( "Wrote - '%s'", outputFilename)
 
-# Main()
 
-logging.info("Starting (Input file: %s)", inputFileName)
-tree = ET.parse(inputFileName)
-logging.info('Parsed XML')
-root = tree.getroot()
-listData = [] # will hold data of interest extracted from the input XML file
+def main(inputFilename, outputFilename):
+	"""Reads XML data from input file and write CSV formatted data to output file
 
-# For each <file> under root
-for file in root.iter(constFileTag):
+	Args:
+		inputFilename (str): Input file name (contents expected to be XML)
+		outputFilename (str): Output file name (contents WILL be CSV)
+	"""
+	logging.info("Reading file: %s)", inputFileName)
+	tree = ET.parse(inputFileName)
+	logging.info('Read XML to memory')
+	root = tree.getroot()
+	listData = [] # will hold data of interest extracted from the input XML file
+	## XML tag names in the input file
 
-	fileName = file.attrib.get('name')
-	logging.debug( 'Processing details of file - %s', fileName)
+	# For each <file> under root
+	for file in root.iter('file'):
 
-	# set/reset vars we use for each change in file
-	sr_num = 0 
-	listTempUnitsInThisFile = []
+		fileName = file.attrib.get('name')
+		logging.debug( 'Processing file tag with name = %s', fileName)
 
-	# for every <unit> under <file> - no matter how deep!
-	for unit in file.findall(".//unit"):
+		# set/reset vars we use for each change in file
+		sr_num = 0 
+		listTempUnitsInThisFile = []
 
-		# extract unit details
-		unitName = unit.attrib["name"]
-		unitKind = unit.attrib["kind"]
+		# for every <unit> under <file> - no matter how deep!
+		for unit in file.findall(".//unit"):
 
-		# Look for units with complexity data
-		unitComplexity = unit.find("./metric[@name='cyclomatic_complexity']")
-		if unitComplexity != None:			
+			# extract unit details
+			unitName = unit.attrib["name"]
+			unitKind = unit.attrib["kind"]
 
-			# keep a tab of unit names we are adding under this file
-			listTempUnitsInThisFile.append(unitName)
-			unitSrNum = listTempUnitsInThisFile.count(unitName) # how many have we got now?
-						
-			# add to list
-			logging.debug( '%s,%s,%s,%s,%s', fileName, unitName, unitSrNum, unitKind, unitComplexity.text )
-			listData.append({
-				"filename": fileName,
-				"unit": unitName,
-				"unit_serial_num": unitSrNum,
-				"kind": unitKind,
-				"cyclomatic_complexity": unitComplexity.text
-				})
+			logging.debug( 'Found unit tag under it with name = %s', unitName)
+			# Look for units with complexity data
+			unitComplexity = unit.find("./metric[@name='cyclomatic_complexity']")
+			logging.debug( 'Looking for complexity metric of this unit')
+			if unitComplexity != None:			
+
+				# keep a tab of unit names we are adding under this file
+				listTempUnitsInThisFile.append(unitName)
+				unitSrNum = listTempUnitsInThisFile.count(unitName) # how many have we got now?
+							
+				# add to list
+				logging.debug( 'Result - %s,%s,%s,%s,%s', fileName, unitName, unitSrNum, unitKind, unitComplexity.text )
+				listData.append({
+					"filename": fileName,
+					"unit": unitName,
+					"unit_serial_num": unitSrNum,
+					"kind": unitKind,
+					"cyclomatic_complexity": unitComplexity.text
+					})
+			else:
+				logging.debug('None found, moving on')
+
+	logging.info( "Finished processing XML. Found complexity data for %s units", len(listData))
+	#print( listData )
+	writeCSV( listData, outputFilename )
 
 
-logging.info( "Done processing XML. Found complexity data for %s units", len(listData))
-#print( listData )
-writeCSV( listData )
+if __name__ == '__main__':
+
+	## I/O File names 
+	##
+	# TEST 
+	inputFileName = 'Test.xml' 
+	outputFilename = 'Test.csv'
+	# FINAL 
+	# inputFileName = '20221209 MP (Ada).xml' # final file
+	# outputFilename = '20221209 MP (Ada)_xml.csv'
+	#
+	## TODO - make it possible to receive the above via command line args
+
+	setLoggingConfig()
+	main(inputFileName, outputFilename)
