@@ -1,4 +1,4 @@
-"""Script to extract cyclomatic complexity data from the XML output of Adacore gnatmetric command
+"""Script to process the XML output of Adacore gnatmetric command
 
 Usage:
 	python <scriptname.py>
@@ -7,6 +7,7 @@ TODO
 	- Error handling
 	- Accept input and output via command line params
 """
+import sys
 import xml.etree.ElementTree as ET
 import csv
 import logging
@@ -14,7 +15,7 @@ import logging
 def setLoggingConfig():
 	"""Set logging level and format
 	"""
-	logging.basicConfig( format='%(asctime)s %(message)s', level=logging.INFO ) 
+	logging.basicConfig( format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO ) 
 
 
 def writeCSV( listOfDictDataItems, outputFilename ):
@@ -50,16 +51,19 @@ def main(inputFilename, outputFilename):
 	Args:
 		inputFilename (str): Input file name (contents expected to be XML)
 		outputFilename (str): Output file name (contents WILL be CSV)
+	
+	Raises:
+		FileNotFoundException: When the input file is not found
 	"""
-	logging.info("Reading file: %s)", inputFileName)
+	logging.info("Opening file: %s)", inputFileName)
 	tree = ET.parse(inputFileName)
-	logging.info('Read XML to memory')
+	logging.info('Parsed XML')
 	root = tree.getroot()
 	listData = [] # will hold data of interest extracted from the input XML file
 	## XML tag names in the input file
 
 	# For each <file> under root
-	for file in root.iter('file'):
+	for file in root.iter('file'): 
 
 		fileName = file.attrib.get('name')
 		logging.debug( 'Processing file tag with name = %s', fileName)
@@ -104,16 +108,31 @@ def main(inputFilename, outputFilename):
 
 if __name__ == '__main__':
 
-	## I/O File names 
-	##
-	# TEST 
-	inputFileName = 'Test.xml' 
-	outputFilename = 'Test.csv'
-	# FINAL 
-	# inputFileName = '20221209 MP (Ada).xml' # final file
-	# outputFilename = '20221209 MP (Ada)_xml.csv'
-	#
-	## TODO - make it possible to receive the above via command line args
 
 	setLoggingConfig()
-	main(inputFileName, outputFilename)
+
+	## I/O File names 
+	##
+	# TEST set
+	# inputFileName = '20221209 (Ada) - Test.xml' 
+	# outputFilename = '20221209 (Ada) - Test.csv'
+	#
+	# FINAL set (TIP: Use forward slashes instead backslashes in paths)
+	# inputFileName = 'D:/TMP/20230106/Data files/20230106 - metrix.xml' # final file
+	# outputFilename = 'D:/TMP/20230106/Data files/20230106 - metrix.csv'
+
+	# accept command line args
+	try:
+		inputFileName = sys.argv[1]
+		outputFilename = sys.argv[2]
+	except:
+		logging.error( f"Usage: python '{__file__}' <input XML filename> <output CSV filename>" )
+		sys.exit(1)
+
+	try:
+		main(inputFileName, outputFilename)
+	except ET.ParseError as pe:
+		logging.error("Cannot parse XML. Please check input file contains valid XML data")
+	except BaseException as e:
+		logging.error(e)
+
