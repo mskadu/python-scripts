@@ -3,9 +3,6 @@
 Usage:
 	python <scriptname.py>
 
-TODO 
-	- Error handling
-	- Accept input and output via command line params
 """
 import sys
 import xml.etree.ElementTree as ET
